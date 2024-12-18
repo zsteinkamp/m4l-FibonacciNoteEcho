@@ -16,6 +16,7 @@ If you just want to download and install the device, then go to the [frozen/](ht
 
 ### Changelog
 
+- [v6](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/releases/download/v6/fibonacciNoteEcho-v6.amxd) - 2024-12-18 - Adds a scale awareness mode
 - [v5](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/releases/download/v5/fibonacciNoteEcho-v5.amxd) - 2024-10-29 - Add non-blocking telemetry ping on load. Does not send any identifying information, only the plugin name, the local computer name, type of computer, and CPU type. I just want to see which plugins are used the most.
 - [v4](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/releases/download/v4/fibonacciNoteEcho-v4.amxd) - 2024-07-28 - Rewrite in Typescript; Flash the bubbles!
 - [v3](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/raw/main/frozen/FibonacciNoteEcho-v3.amxd) - 2023-07-12 - Added note mode to time base.
@@ -31,6 +32,7 @@ If you just want to download and install the device, then go to the [frozen/](ht
 - _Iterations_ - The number of notes to emit. Each successive note will be delayed from the last note according to the Fibonacci Sequence.
 
 - _Note Incr_ - Controls how each successive note pitch differs from the last. For example, set to +12 to have each note in the echo sequence increase by an octave.
+- _Scale Aware_ - Toggle scale awareness with this button. If the global scale is also enabled, will restrict note output to notes in the given scale.
 
 - _Vel Decay_ - The factor by which the note velocity is multiplied in each iteration. Numbers less than one will result in velocity decreasing with each note echo. Values greater than one will result in increasing velocity values.
 

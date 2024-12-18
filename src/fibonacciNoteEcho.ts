@@ -1,4 +1,5 @@
-inlets = 9
+autowatch = 1
+inlets = 10
 outlets = 4
 
 function log(_: any) {
@@ -30,6 +31,7 @@ const INLET_DUR_BASE = 5
 const INLET_DUR_DECAY = 6
 const INLET_NOTE_INCR = 7
 const INLET_VELOCITY_DECAY = 8
+const INLET_SCALE_AWARE = 9
 
 // the position in the options array corresponds to the inlet index
 const options = [
@@ -42,7 +44,25 @@ const options = [
   0.667, // INLET_DUR_DECAY
   0, // INLET_NOTE_INCR
   0.8, // INLET_VELOCITY_DECAY
+  1, // INLET_SCALE_AWARE
 ]
+
+type ScaleType = {
+  notes: number[]
+  watchers: {
+    root: LiveAPI
+    int: LiveAPI
+    mode: LiveAPI
+  }
+}
+const scale: ScaleType = {
+  notes: [],
+  watchers: {
+    root: null,
+    int: null,
+    mode: null,
+  },
+}
 
 // outlets
 const OUTLET_NOTE = 0
@@ -52,10 +72,66 @@ const OUTLET_JSUI = 3
 
 let pattern: Step[] = []
 
+function init() {
+  if (!scale.watchers.root) {
+    scale.watchers.root = new LiveAPI(updateScales, 'live_set')
+    scale.watchers.root.property = 'root_note'
+
+    scale.watchers.int = new LiveAPI(updateScales, 'live_set')
+    scale.watchers.int.property = 'scale_intervals'
+
+    scale.watchers.mode = new LiveAPI(updateScales, 'live_set')
+    scale.watchers.mode.property = 'scale_mode'
+  }
+}
+
+function updateScales() {
+  if (!scale.watchers.root) {
+    //log('early')
+    return
+  }
+  const api = new LiveAPI(() => {}, 'live_set')
+  const root = api.get('root_note')
+  const intervals = api.get('scale_intervals')
+  scale.notes = []
+
+  let root_note = root - 12
+  let note = root_note
+
+  while (note <= 127) {
+    for (const interval of intervals) {
+      note = root_note + interval
+      if (note >= 0 && note <= 127) {
+        scale.notes.push(note)
+      }
+    }
+    root_note += 12
+    note = root_note
+  }
+  //log(
+  //  'ROOT=' +
+  //    root +
+  //    ' INT=' +
+  //    intervals +
+  //    ' MODE=' +
+  //    state.scale_mode +
+  //    ' NAME=' +
+  //    state.scale_name +
+  //    ' AWARE=' +
+  //    state.scale_aware +
+  //    ' NOTES=' +
+  //    state.scale_notes
+  //)
+}
+
 // Method to calculate the Fibonacci pattern for the current knob values.
 function setupPattern() {
   //log(options);
   pattern = []
+
+  if (options[INLET_SCALE_AWARE]) {
+    updateScales()
+  }
 
   // first note plays immediately
   pattern.push({
@@ -95,15 +171,27 @@ function setupPattern() {
   // Pass 'update' as the head of the array sent to the JSUI outlet calls the
   // 'update' method in the jsui object with the rest of the pattern array as
   // js args. This results in the visualization being redrawn.
-  const updateCmd = 'update' as string | Step
-  outlet(OUTLET_JSUI, [updateCmd].concat(pattern))
+  outlet(OUTLET_JSUI, ['update', ...pattern])
 }
 
 // Returns a function that when executed will send a note of a given pitch,
 // velocity, and duration to the outlets.
 function makeTask(i: number, p: Step, n: number, v: number) {
+  //log('MAKE_TASK scale_aware=' + options[INLET_SCALE_AWARE])
   return function () {
-    n = n + p.note_incr
+    if (options[INLET_SCALE_AWARE]) {
+      // get base note, look up
+      const baseIdx = scale.notes.indexOf(n)
+      const newIdx = baseIdx + p.note_incr
+      n = scale.notes[newIdx]
+      //log('NOTE: ' + n + ' base:' + baseIdx + ' new:' + newIdx)
+      if (!n) {
+        // invalid note
+        return
+      }
+    } else {
+      n = n + p.note_incr
+    }
     v = Math.floor(v * p.velocity_coeff)
     const d = p.duration
 
@@ -114,7 +202,7 @@ function makeTask(i: number, p: Step, n: number, v: number) {
     //  d: d,
     //});
 
-    outlet(OUTLET_JSUI, ['flash'].concat(i.toString()))
+    outlet(OUTLET_JSUI, 'flash', i.toString())
     outlet(OUTLET_DURATION, d)
     outlet(OUTLET_VELOCITY, v)
     outlet(OUTLET_NOTE, n)
@@ -144,6 +232,17 @@ function handleMessage(value: number) {
 
   if (inlet === INLET_NOTE && options[INLET_VELOCITY] > 0) {
     // note received
+    if (options[INLET_SCALE_AWARE]) {
+      // adjust note to scale if scale_aware is set
+      let noteNum = options[INLET_NOTE]
+      let scaleIdx = scale.notes.indexOf(noteNum)
+
+      while (scaleIdx < 0 && noteNum > 0) {
+        noteNum -= 1
+        scaleIdx = scale.notes.indexOf(noteNum)
+      }
+      options[INLET_NOTE] = noteNum
+    }
     for (let idx = 0; idx < pattern.length; idx++) {
       // Schedule a note-playing task to execute for each element in the
       // pattern, at time_offset in the future.
