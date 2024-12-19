@@ -1,6 +1,6 @@
 # m4l-js-fibonacciNoteEcho
 
-This Max For Live device uses Javascript to implement a MIDI note echo effect where the echoes follow the pattern of the [Fibonacci Sequence](https://en.wikipedia.org/wiki/Fibonacci_number).
+This Max For Live device implements a MIDI note echo effect where the echoes follow the pattern of the [Fibonacci Sequence](https://en.wikipedia.org/wiki/Fibonacci_number).
 
 ![Screenshot Example](images/screenshot.gif)
 
