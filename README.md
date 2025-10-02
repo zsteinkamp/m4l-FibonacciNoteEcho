@@ -16,6 +16,7 @@ If you just want to download and install the device, then go to the [frozen/](ht
 
 ### Changelog
 
+- [v7](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/releases/download/v7/fibonacciNoteEcho-v7.amxd) - 2025-10-01 - Check for version updates; Better help button experience.
 - [v6](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/releases/download/v6/fibonacciNoteEcho-v6.amxd) - 2024-12-18 - Adds a scale awareness mode
 - [v5](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/releases/download/v5/fibonacciNoteEcho-v5.amxd) - 2024-10-29 - Add non-blocking telemetry ping on load. Does not send any identifying information, only the plugin name, the local computer name, type of computer, and CPU type. I just want to see which plugins are used the most.
 - [v4](https://github.com/zsteinkamp/m4l-js-fibonacciNoteEcho/releases/download/v4/fibonacciNoteEcho-v4.amxd) - 2024-07-28 - Rewrite in Typescript; Flash the bubbles!
